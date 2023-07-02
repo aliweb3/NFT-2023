@@ -23,10 +23,10 @@
 pragma solidity 0.8.19;
 
 import {ERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+//import {Ownable} from "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {Base64} from "lib/openzeppelin-contracts/contracts/utils/Base64.sol";
 
-abstract contract MoodNft is ERC721, Ownable {
+  contract MoodNft is ERC721 {
     error ERC721Metadata__URI_QueryFor_NonExistentToken();
     error MoodNft__CantFlipMoodIfNotOwner();
 
@@ -35,11 +35,11 @@ abstract contract MoodNft is ERC721, Ownable {
         SAD
     }
 
-    uint256 private s_tokenCounter;
-    string private s_sadSvgUri;
-    string private s_happySvgUri;
+    uint256 private _tokenCounter;
+    string private _sadSvgUri;
+    string private _happySvgUri;
 
-    mapping(uint256 => NFTState) private s_tokenIdToState;
+    mapping(uint256 => NFTState) private _tokenIdToState;
 
     event CreatedNFT(uint256 indexed tokenId);
 
@@ -47,16 +47,16 @@ abstract contract MoodNft is ERC721, Ownable {
         string memory sadSvgUri,
         string memory happySvgUri
     ) ERC721("Mood NFT", "MN") {
-        s_tokenCounter = 0;
-        s_sadSvgUri = sadSvgUri;
-        s_happySvgUri = happySvgUri;
+        _tokenCounter = 0;
+        _sadSvgUri = sadSvgUri;
+        _happySvgUri = happySvgUri;
     }
 
     function mintNft() public {
         // how would you require payment for this NFT?
-        _safeMint(msg.sender, s_tokenCounter);
-        s_tokenCounter = s_tokenCounter + 1;
-        emit CreatedNFT(s_tokenCounter);
+        _safeMint(msg.sender, _tokenCounter);
+        _tokenCounter = _tokenCounter + 1;
+        emit CreatedNFT(_tokenCounter);
     }
 
     function flipMood(uint256 tokenId) public {
@@ -64,10 +64,10 @@ abstract contract MoodNft is ERC721, Ownable {
             revert MoodNft__CantFlipMoodIfNotOwner();
         }
 
-        if (s_tokenIdToState[tokenId] == NFTState.HAPPY) {
-            s_tokenIdToState[tokenId] = NFTState.SAD;
+        if (_tokenIdToState[tokenId] == NFTState.HAPPY) {
+            _tokenIdToState[tokenId] = NFTState.SAD;
         } else {
-            s_tokenIdToState[tokenId] = NFTState.HAPPY;
+            _tokenIdToState[tokenId] = NFTState.HAPPY;
         }
     }
 
@@ -81,10 +81,10 @@ abstract contract MoodNft is ERC721, Ownable {
         if (!_exists(tokenId)) {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
-        string memory imageURI = s_happySvgUri;
+        string memory imageURI = _happySvgUri;
 
-        if (s_tokenIdToState[tokenId] == NFTState.SAD) {
-            imageURI = s_sadSvgUri;
+        if (_tokenIdToState[tokenId] == NFTState.SAD) {
+            imageURI = _sadSvgUri;
         }
         return
             string(
@@ -107,14 +107,14 @@ abstract contract MoodNft is ERC721, Ownable {
     }
 
     function getHappySVG() public view returns (string memory) {
-        return s_happySvgUri;
+        return _happySvgUri;
     }
 
     function getSadSVG() public view returns (string memory) {
-        return s_sadSvgUri;
+        return _sadSvgUri;
     }
 
     function getTokenCounter() public view returns (uint256) {
-        return s_tokenCounter;
+        return _tokenCounter;
     }
 }
